@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Camera, MapPin, Send, AlertCircle, CheckCircle2 } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Camera, MapPin, Send, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../lib/firebase";
 import { cn } from "../lib/utils";
@@ -8,6 +8,8 @@ import { cn } from "../lib/utils";
 export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     type: "시설파손",
     description: "",
@@ -15,36 +17,60 @@ export default function ReportPage() {
     photo: null as File | null
   });
 
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
   const types = ["시설파손", "우범지역", "어두운 지역", "아동방임의심", "불법주정차", "기타"];
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, photo: file });
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const removePhoto = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setFormData({ ...formData, photo: null });
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!db) {
-      alert("Firebase가 설정되지 않았습니다. 관리자에게 문의하세요.");
+      alert("Firebase 설정이 완료되지 않았습니다. 오른쪽에 있는 'Set up Firebase' 버튼을 눌러 설정을 진행하고 이용약관에 동의해주세요.");
       return;
     }
     
     setLoading(true);
     try {
-      // In a real app, upload photo to Firebase Storage first
-      // Here we mock the behavior or store as base64 if small (but for now let's just save metadata)
+      // In a real app, upload photo to Firebase Storage and get URL
+      // For this prototype, we'll store metadata
       
       await addDoc(collection(db, "reports"), {
         type: formData.type,
         description: formData.description,
         location: {
           address: formData.address,
-          lat: 37.5925, // Mock Hoegi-dong coord
+          lat: 37.5925,
           lng: 127.0531
         },
         status: "pending",
         createdAt: serverTimestamp(),
         reporterId: auth?.currentUser?.uid || "anonymous",
-        reporterName: auth?.currentUser?.displayName || "익명 주민"
+        reporterName: auth?.currentUser?.displayName || "익명 주민",
+        // photoUrl: uploadedUrl
       });
 
       setSuccess(true);
       setFormData({ type: "시설파손", description: "", address: "", photo: null });
+      setPreviewUrl(null);
     } catch (err) {
       console.error(err);
       alert("신고 제출 중 오류가 발생했습니다.");
@@ -144,13 +170,61 @@ export default function ReportPage() {
               </div>
             </div>
 
-            {/* Photo Upload Placeholder */}
+            {/* Photo Upload */}
             <div>
               <label className="block text-sm font-bold text-dark mb-3">사진 첨부 (선택)</label>
-              <div className="border-2 border-dashed border-muted rounded-[2rem] p-10 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 transition-all cursor-pointer">
-                <Camera className="w-12 h-12 mb-4" />
-                <p className="text-sm font-medium">사진을 드래그하거나 클릭하여 업로드</p>
-                <p className="text-xs mt-2 uppercase tracking-widest opacity-50">JPG, PNG (MAX. 5MB)</p>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className={cn(
+                  "border-2 border-dashed border-muted rounded-[2rem] p-10 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 transition-all cursor-pointer overflow-hidden relative min-h-[200px]",
+                  previewUrl && "border-primary bg-primary/5 border-solid"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {previewUrl ? (
+                    <motion.div 
+                      key="preview"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <img 
+                        src={previewUrl} 
+                        alt="Preview" 
+                        className="w-full h-full object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={removePhoto}
+                          className="bg-white/90 p-3 rounded-full text-red-500 hover:bg-white transition-all shadow-lg"
+                        >
+                          <X className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="placeholder"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center"
+                    >
+                      <Camera className="w-12 h-12 mb-4" />
+                      <p className="text-sm font-medium">사진을 드래그하거나 클릭하여 업로드</p>
+                      <p className="text-xs mt-2 uppercase tracking-widest opacity-50">JPG, PNG (MAX. 5MB)</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </div>
 

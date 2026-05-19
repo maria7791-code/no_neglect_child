@@ -26,7 +26,10 @@ export default function AdminPage() {
   }, []);
 
   const runAnalysis = async () => {
-    if (!db) return;
+    if (!db) {
+      alert("Firebase 설정을 먼저 완료해주세요. (Set up Firebase 버튼 클릭)");
+      return;
+    }
     setAnalyzing(true);
     try {
       const q = query(collection(db, "reports"), orderBy("createdAt", "desc"), limit(20));

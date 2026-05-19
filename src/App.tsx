@@ -116,19 +116,19 @@ function Layout({ children }: { children: React.ReactNode }) {
       </main>
       <footer className="bg-white border-t border-muted py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-center md:text-left">
             <div>
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center justify-center md:justify-start gap-2 mb-4">
                 <ShieldCheck className="text-primary w-6 h-6" />
-                <span className="text-lg font-bold">안전한 회기동 만들기</span>
+                <span className="text-lg font-bold uppercase tracking-tight">소금제비</span>
               </div>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 max-w-md mx-auto md:mx-0">
                 경희대학교 시민과학 수업 프로젝트 '소금제비' 조가 운영합니다.
-                우리는 회기동의 모든 아이들이 방임되지 않고 안심하고 다닐 수 있는 동네를 만들기 위해 노력합니다.
+                회기동의 모든 아이들이 안심하고 다닐 수 있는 동네를 만들기 위해 노력합니다.
               </p>
             </div>
             <div className="text-sm text-gray-400 md:text-right">
-              © 2026 소금제비 (Kyung Hee Univ. Citizen Science). All rights reserved.
+              © 2026 소금제비 (Kyung Hee Univ. Citizen Science Project). All rights reserved.
             </div>
           </div>
         </div>

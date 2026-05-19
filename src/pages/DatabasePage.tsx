@@ -69,6 +69,12 @@ export default function DatabasePage() {
         <div className="flex justify-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>
+      ) : !db ? (
+        <div className="bg-white rounded-[3rem] p-20 text-center border border-muted">
+          <AlertCircle className="w-16 h-16 text-orange-400 mx-auto mb-6" />
+          <h3 className="text-2xl font-bold mb-2">Firebase 설정이 필요합니다</h3>
+          <p className="text-gray-500">신고 내역을 불러오려면 오른쪽의 'Set up Firebase'를 완료해주세요.</p>
+        </div>
       ) : filteredReports.length === 0 ? (
         <div className="bg-white rounded-[3rem] p-20 text-center border border-muted">
           <Shield className="w-16 h-16 text-muted mx-auto mb-6" />
