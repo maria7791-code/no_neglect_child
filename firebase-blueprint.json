@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "Report": {
+      "title": "Hazard Report",
+      "description": "A report of a dangerous location or neglected child situation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["시설파손", "우범지역", "어두운 지역", "아동방임의심", "기타"] },
+        "description": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" },
+            "address": { "type": "string" }
+          }
+        },
+        "photoUrl": { "type": "string" },
+        "reporterId": { "type": "string" },
+        "reporterName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "verified", "resolved"] }
+      },
+      "required": ["type", "description", "location", "reporterId", "createdAt", "status"]
+    },
+    "SafeSpace": {
+      "title": "Safe Space",
+      "description": "A verified safe location for children in Hoegi-dong",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["편의점", "지역아동센터", "도서관", "경찰서", "지킴이집"] },
+        "description": { "type": "string" },
+        "address": { "type": "string" },
+        "contact": { "type": "string" },
+        "location": {
+          "type": "object",
+          "properties": {
+            "lat": { "type": "number" },
+            "lng": { "type": "number" }
+          }
+        }
+      },
+      "required": ["name", "type", "address", "location"]
+    },
+    "Analysis": {
+      "title": "AI Safety Analysis",
+      "description": "AI analysis of safety patterns in Hoegi-dong",
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "topRisks": { "type": "array", "items": { "type": "string" } },
+        "recommendations": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/reports/{reportId}": {
+      "schema": "Report",
+      "description": "User submitted safety reports"
+    },
+    "/safeSpaces/{spaceId}": {
+      "schema": "SafeSpace",
+      "description": "Curated safe zones for kids"
+    },
+    "/system/analysis": {
+      "schema": "Analysis",
+      "description": "Global safety analysis result"
+    }
+  }
+}

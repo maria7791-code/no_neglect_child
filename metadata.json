@@ -1,0 +1,6 @@
+{
+  "name": "안전한 회기동 만들기",
+  "description": "방임된 아이들이 안심하고 다닐 수 있는 동네를 위한 위험지역 신고 및 분석 플랫폼",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
